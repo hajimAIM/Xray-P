@@ -7,7 +7,7 @@ import (
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf"
 
-	"github.com/XrayR-project/XrayR/api"
+	"Xray-P/api"
 )
 
 // OutboundBuilder build freedom outbound config for addOutbound
@@ -17,7 +17,9 @@ func OutboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.
 	outboundDetourConfig.Tag = tag
 
 	// SendThrough setting
-	outboundDetourConfig.SendThrough = &config.SendIP
+	if config.SendIP != "" {
+		outboundDetourConfig.SendThrough = &config.SendIP
+	}
 
 	// Freedom Protocol setting
 	var domainStrategy = "Asis"

@@ -17,7 +17,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 
-	"github.com/XrayR-project/XrayR/api"
+	"Xray-P/api"
 )
 
 var (
@@ -442,6 +442,7 @@ func (c *APIClient) ParseV2rayNodeResponse(nodeInfoResponse *NodeInfoResponse) (
 			}
 		}
 	}
+
 	extraServerConf := strings.Split(serverConf[5], "|")
 	serviceName = ""
 	for _, item := range extraServerConf {

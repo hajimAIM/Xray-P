@@ -7,8 +7,8 @@ import (
 	_ "github.com/xtls/xray-core/app/proxyman/outbound"
 
 	// Required features. Can't remove unless there is replacements.
-	// _ "github.com/xtls/xray-core/app/dispatcher"
-	_ "github.com/XrayR-project/XrayR/app/mydispatcher"
+	// Required features. Can't remove unless there is replacements.
+	_ "github.com/xtls/xray-core/app/dispatcher"
 
 	// Default commander and all its services. This is an optional feature.
 	_ "github.com/xtls/xray-core/app/commander"
@@ -20,6 +20,7 @@ import (
 	_ "github.com/xtls/xray-core/app/dns"
 	_ "github.com/xtls/xray-core/app/log"
 	_ "github.com/xtls/xray-core/app/metrics"
+	_ "github.com/xtls/xray-core/app/observatory"
 	_ "github.com/xtls/xray-core/app/policy"
 	_ "github.com/xtls/xray-core/app/reverse"
 	_ "github.com/xtls/xray-core/app/router"
@@ -60,6 +61,7 @@ import (
 	_ "github.com/xtls/xray-core/transport/internet/headers/utp"
 	_ "github.com/xtls/xray-core/transport/internet/headers/wechat"
 	_ "github.com/xtls/xray-core/transport/internet/headers/wireguard"
+	_ "github.com/xtls/xray-core/transport/internet/tagged/taggedimpl"
 
 	// JSON & TOML & YAML
 	_ "github.com/xtls/xray-core/main/json"

@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"regexp"
 
 	"github.com/xtls/xray-core/infra/conf"
+	xrayr "github.com/xtls/xray-core/xrayr/api"
 )
 
 const (
@@ -80,29 +80,9 @@ type NodeInfo struct {
 	RejectUnknownSni    bool
 }
 
-type UserInfo struct {
-	UID         int
-	Email       string
-	UUID        string
-	Passwd      string
-	Port        uint32
-	AlterID     uint16
-	Method      string
-	SpeedLimit  uint64 // Bps
-	DeviceLimit int
-}
-
-type OnlineUser struct {
-	UID int
-	IP  string
-}
-
-type UserTraffic struct {
-	UID      int
-	Email    string
-	Upload   int64
-	Download int64
-}
+type UserInfo = xrayr.UserInfo
+type OnlineUser = xrayr.OnlineUser
+type UserTraffic = xrayr.UserTraffic
 
 type ClientInfo struct {
 	APIHost  string
@@ -111,15 +91,8 @@ type ClientInfo struct {
 	NodeType string
 }
 
-type DetectRule struct {
-	ID      int
-	Pattern *regexp.Regexp
-}
-
-type DetectResult struct {
-	UID    int
-	RuleID int
-}
+type DetectRule = xrayr.DetectRule
+type DetectResult = xrayr.DetectResult
 
 type REALITYConfig struct {
 	Dest             string

@@ -1,18 +1,20 @@
 package panel
 
 import (
-	"github.com/XrayR-project/XrayR/api"
-	"github.com/XrayR-project/XrayR/service/controller"
+	"Xray-P/service/controller"
+
+	"Xray-P/api"
 )
 
 type Config struct {
-	LogConfig          *LogConfig        `mapstructure:"Log"`
-	DnsConfigPath      string            `mapstructure:"DnsConfigPath"`
-	InboundConfigPath  string            `mapstructure:"InboundConfigPath"`
-	OutboundConfigPath string            `mapstructure:"OutboundConfigPath"`
-	RouteConfigPath    string            `mapstructure:"RouteConfigPath"`
-	ConnectionConfig   *ConnectionConfig `mapstructure:"ConnectionConfig"`
-	NodesConfig        []*NodesConfig    `mapstructure:"Nodes"`
+	LogConfig             *LogConfig        `mapstructure:"Log"`
+	DnsConfigPath         string            `mapstructure:"DnsConfigPath"`
+	InboundConfigPath     string            `mapstructure:"InboundConfigPath"`
+	OutboundConfigPath    string            `mapstructure:"OutboundConfigPath"`
+	ObservatoryConfigPath string            `mapstructure:"ObservatoryConfigPath"`
+	RouteConfigPath       string            `mapstructure:"RouteConfigPath"`
+	ConnectionConfig      *ConnectionConfig `mapstructure:"ConnectionConfig"`
+	NodesConfig           []*NodesConfig    `mapstructure:"Nodes"`
 }
 
 type NodesConfig struct {

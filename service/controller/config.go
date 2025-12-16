@@ -1,8 +1,9 @@
 package controller
 
 import (
-	"github.com/XrayR-project/XrayR/common/limiter"
-	"github.com/XrayR-project/XrayR/common/mylego"
+	"Xray-P/common/mylego"
+
+	"github.com/xtls/xray-core/xrayr/limiter"
 )
 
 type Config struct {
@@ -24,6 +25,7 @@ type Config struct {
 	DisableLocalREALITYConfig bool                             `mapstructure:"DisableLocalREALITYConfig"`
 	EnableREALITY             bool                             `mapstructure:"EnableREALITY"`
 	REALITYConfigs            *REALITYConfig                   `mapstructure:"REALITYConfigs"`
+	ObservatoryConfigPath     string                           `mapstructure:"ObservatoryConfigPath"`
 }
 
 type AutoSpeedLimitConfig struct {

@@ -3,9 +3,9 @@ package controller_test
 import (
 	"testing"
 
-	"github.com/XrayR-project/XrayR/api"
-	"github.com/XrayR-project/XrayR/common/mylego"
-	. "github.com/XrayR-project/XrayR/service/controller"
+	"Xray-P/api"
+	"Xray-P/common/mylego"
+	. "Xray-P/service/controller"
 )
 
 func TestBuildV2ray(t *testing.T) {
@@ -77,6 +77,7 @@ func TestBuildSS(t *testing.T) {
 		Host:              "test.test.tk",
 		Path:              "v2ray",
 		EnableTLS:         false,
+		CypherMethod:      "aes-128-gcm",
 	}
 	DNSEnv := make(map[string]string)
 	DNSEnv["ALICLOUD_ACCESS_KEY"] = "aaa"

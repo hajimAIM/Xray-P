@@ -15,18 +15,11 @@ import (
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf"
 
-	"github.com/XrayR-project/XrayR/api"
-	"github.com/XrayR-project/XrayR/api/bunpanel"
-	"github.com/XrayR-project/XrayR/api/gov2panel"
-	"github.com/XrayR-project/XrayR/api/newV2board"
-	"github.com/XrayR-project/XrayR/api/pmpanel"
-	"github.com/XrayR-project/XrayR/api/proxypanel"
-	"github.com/XrayR-project/XrayR/api/sspanel"
-	"github.com/XrayR-project/XrayR/api/v2raysocks"
-	"github.com/XrayR-project/XrayR/app/mydispatcher"
-	_ "github.com/XrayR-project/XrayR/cmd/distro/all"
-	"github.com/XrayR-project/XrayR/service"
-	"github.com/XrayR-project/XrayR/service/controller"
+	"Xray-P/api"
+	"Xray-P/api/sspanel"
+	_ "Xray-P/cmd/distro/all"
+	"Xray-P/service"
+	"Xray-P/service/controller"
 )
 
 // Panel Structure
@@ -93,6 +86,23 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	if err != nil {
 		log.Panicf("Failed to understand Routing config  Please check: https://xtls.github.io/config/routing.html for help: %s", err)
 	}
+
+	// Observatory config
+	coreObservatoryConfig := &conf.ObservatoryConfig{}
+	if panelConfig.ObservatoryConfigPath != "" {
+		if data, err := os.ReadFile(panelConfig.ObservatoryConfigPath); err != nil {
+			log.Panicf("Failed to read Observatory config file at: %s", panelConfig.ObservatoryConfigPath)
+		} else {
+			if err = json.Unmarshal(data, coreObservatoryConfig); err != nil {
+				log.Panicf("Failed to unmarshal Observatory config: %s", panelConfig.ObservatoryConfigPath)
+			}
+		}
+	}
+	observatoryConfig, err := coreObservatoryConfig.Build()
+	if err != nil {
+		log.Panicf("Failed to understand Observatory config: %s", err)
+	}
+
 	// Custom Inbound config
 	var coreCustomInboundConfig []conf.InboundDetourConfig
 	if panelConfig.InboundConfigPath != "" {
@@ -141,13 +151,13 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 		App: []*serial.TypedMessage{
 			serial.ToTypedMessage(coreLogConfig.Build()),
 			serial.ToTypedMessage(&dispatcher.Config{}),
-			serial.ToTypedMessage(&mydispatcher.Config{}),
 			serial.ToTypedMessage(&stats.Config{}),
 			serial.ToTypedMessage(&proxyman.InboundConfig{}),
 			serial.ToTypedMessage(&proxyman.OutboundConfig{}),
 			serial.ToTypedMessage(policyConfig),
 			serial.ToTypedMessage(dnsConfig),
 			serial.ToTypedMessage(routeConfig),
+			serial.ToTypedMessage(observatoryConfig),
 		},
 		Inbound:  inBoundConfig,
 		Outbound: outBoundConfig,
@@ -175,24 +185,12 @@ func (p *Panel) Start() {
 	// Load Nodes config
 	for _, nodeConfig := range p.panelConfig.NodesConfig {
 		var apiClient api.API
-		switch nodeConfig.PanelType {
-		case "SSpanel":
-			apiClient = sspanel.New(nodeConfig.ApiConfig)
-		case "NewV2board", "V2board":
-			apiClient = newV2board.New(nodeConfig.ApiConfig)
-		case "PMpanel":
-			apiClient = pmpanel.New(nodeConfig.ApiConfig)
-		case "Proxypanel":
-			apiClient = proxypanel.New(nodeConfig.ApiConfig)
-		case "V2RaySocks":
-			apiClient = v2raysocks.New(nodeConfig.ApiConfig)
-		case "GoV2Panel":
-			apiClient = gov2panel.New(nodeConfig.ApiConfig)
-		case "BunPanel":
-			apiClient = bunpanel.New(nodeConfig.ApiConfig)
-		default:
-			log.Panicf("Unsupport panel type: %s", nodeConfig.PanelType)
+		// Forcing SSPanel support only
+		if nodeConfig.PanelType != "SSpanel" {
+			log.Warnf("Force using SSPanel logic for configured type: %s", nodeConfig.PanelType)
 		}
+		apiClient = sspanel.New(nodeConfig.ApiConfig)
+
 		var controllerService service.Service
 		// Register controller service
 		controllerConfig := getDefaultControllerConfig()
@@ -201,7 +199,10 @@ func (p *Panel) Start() {
 				log.Panicf("Read Controller Config Failed")
 			}
 		}
-		controllerService = controller.New(server, apiClient, controllerConfig, nodeConfig.PanelType)
+		// Pass Observatory Config Path to Controller
+		controllerConfig.ObservatoryConfigPath = p.panelConfig.ObservatoryConfigPath
+
+		controllerService = controller.New(server, apiClient, controllerConfig)
 		p.Service = append(p.Service, controllerService)
 
 	}
@@ -214,7 +215,6 @@ func (p *Panel) Start() {
 		}
 	}
 	p.Running = true
-	return
 }
 
 // Close the panel
@@ -230,7 +230,7 @@ func (p *Panel) Close() {
 	p.Service = nil
 	p.Server.Close()
 	p.Running = false
-	return
+
 }
 
 func parseConnectionConfig(c *ConnectionConfig) (policy *conf.Policy) {
@@ -243,6 +243,7 @@ func parseConnectionConfig(c *ConnectionConfig) (policy *conf.Policy) {
 	policy = &conf.Policy{
 		StatsUserUplink:   true,
 		StatsUserDownlink: true,
+		StatsUserOnline:   true,
 		Handshake:         &connectionConfig.Handshake,
 		ConnectionIdle:    &connectionConfig.ConnIdle,
 		UplinkOnly:        &connectionConfig.UplinkOnly,

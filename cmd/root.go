@@ -12,11 +12,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	xraylog "Xray-P/common/log"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/XrayR-project/XrayR/panel"
+	"Xray-P/panel"
 )
 
 var (
@@ -76,6 +78,8 @@ func run() error {
 		return fmt.Errorf("Parse config file %v failed: %s \n", cfgFile, err)
 	}
 
+	// Modern Log Format
+	log.SetFormatter(&xraylog.ModernFormatter{})
 	if panelConfig.LogConfig.Level == "debug" {
 		log.SetReportCaller(true)
 	}
@@ -110,7 +114,7 @@ func run() error {
 	runtime.GC()
 	// Running backend
 	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, os.Interrupt, os.Kill, syscall.SIGTERM)
+	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
 	<-osSignals
 
 	return nil

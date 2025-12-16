@@ -7,18 +7,19 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/xtls/xray-core/app/dispatcher"
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/task"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/features/inbound"
 	"github.com/xtls/xray-core/features/outbound"
 	"github.com/xtls/xray-core/features/policy"
+	"github.com/xtls/xray-core/features/routing"
 	"github.com/xtls/xray-core/features/stats"
 
-	"github.com/XrayR-project/XrayR/api"
-	"github.com/XrayR-project/XrayR/app/mydispatcher"
-	"github.com/XrayR-project/XrayR/common/mylego"
-	"github.com/XrayR-project/XrayR/common/serverstatus"
+	"Xray-P/api"
+	"Xray-P/common/mylego"
+	"Xray-P/common/serverstatus"
 )
 
 type LimitInfo struct {
@@ -43,7 +44,7 @@ type Controller struct {
 	obm          outbound.Manager
 	stm          stats.Manager
 	pm           policy.Manager
-	dispatcher   *mydispatcher.DefaultDispatcher
+	dispatcher   *dispatcher.DefaultDispatcher
 	startAt      time.Time
 	logger       *log.Entry
 }
@@ -54,7 +55,7 @@ type periodicTask struct {
 }
 
 // New return a Controller service with default parameters.
-func New(server *core.Instance, api api.API, config *Config, panelType string) *Controller {
+func New(server *core.Instance, api api.API, config *Config) *Controller {
 	logger := log.NewEntry(log.StandardLogger()).WithFields(log.Fields{
 		"Host": api.Describe().APIHost,
 		"Type": api.Describe().NodeType,
@@ -64,12 +65,12 @@ func New(server *core.Instance, api api.API, config *Config, panelType string) *
 		server:     server,
 		config:     config,
 		apiClient:  api,
-		panelType:  panelType,
+		panelType:  "SSPanel",
 		ibm:        server.GetFeature(inbound.ManagerType()).(inbound.Manager),
 		obm:        server.GetFeature(outbound.ManagerType()).(outbound.Manager),
 		stm:        server.GetFeature(stats.ManagerType()).(stats.Manager),
 		pm:         server.GetFeature(policy.ManagerType()).(policy.Manager),
-		dispatcher: server.GetFeature(mydispatcher.Type()).(*mydispatcher.DefaultDispatcher),
+		dispatcher: server.GetFeature(routing.DispatcherType()).(*dispatcher.DefaultDispatcher),
 		startAt:    time.Now(),
 		logger:     logger,
 	}
@@ -94,7 +95,7 @@ func (c *Controller) Start() error {
 	// Add new tag
 	err = c.addNewTag(newNodeInfo)
 	if err != nil {
-		c.logger.Panic(err)
+		c.logger.Error(err)
 		return err
 	}
 	// Update user
