@@ -29,11 +29,11 @@ Currently, this project **ONLY** supports the following panel:
 
 ```powershell
 # Clone the repository
-git clone https://github.com/your-repo/Xray-P.git
+git clone https://github.com/hajimAIM/Xray-P.git
 cd Xray-P
 
 # Build the binary
-go build -o Xray-P.exe -trimpath -ldflags "-s -w" main.go
+go build .
 ```
 
 ### Configuration
