@@ -1,0 +1,9 @@
+{
+	"email": "ss@ss.com",
+	"registration": {
+		"body": {
+			"status": "valid"
+		},
+		"uri": "https://acme-v02.api.letsencrypt.org/acme/acct/2880228276"
+	}
+}
