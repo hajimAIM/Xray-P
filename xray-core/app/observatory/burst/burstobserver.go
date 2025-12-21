@@ -2,9 +2,13 @@ package burst
 
 import (
 	"context"
+	"fmt"
+	"sort"
+	"time"
 
 	"sync"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/xtls/xray-core/app/observatory"
 	"github.com/xtls/xray-core/common"
 	"github.com/xtls/xray-core/common/errors"
@@ -75,8 +79,117 @@ func (o *Observer) Start() error {
 			outbounds := hs.Select(o.config.SubjectSelector)
 			return outbounds, nil
 		})
+		go o.background()
 	}
 	return nil
+}
+
+func (o *Observer) background() {
+	for !o.finished.Done() {
+		sleepTime := time.Second * 10
+		if o.hp.Settings.Interval != 0 {
+			sleepTime = o.hp.Settings.Interval * time.Duration(o.hp.Settings.SamplingCount)
+		}
+
+		// Visual Logging
+		o.logVisualStatus()
+
+		select {
+		case <-time.After(sleepTime):
+		case <-o.finished.Wait():
+			return
+		}
+	}
+}
+
+func (o *Observer) logVisualStatus() {
+	o.statusLock.Lock()
+	defer o.statusLock.Unlock()
+
+	boxStyle := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63")).
+		Padding(0, 1)
+
+	titleStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("86")).
+		Bold(true).
+		MarginBottom(1)
+
+	rowStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("252"))
+
+	selectedStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("46")).
+		Bold(true)
+
+	deadStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("160")).
+		Faint(true)
+
+	var rows []string
+	rows = append(rows, titleStyle.Render("🔭 Observatory Status (Burst)"))
+
+	statusList := o.createResult()
+
+	// Find best
+	var bestIdx = -1
+	var minDelay int64 = 99999999
+
+	for i, status := range statusList {
+		if status.Alive && status.Delay < minDelay {
+			minDelay = status.Delay
+			bestIdx = i
+		}
+	}
+
+	// Sort for consistent display
+	sort.Slice(statusList, func(i, j int) bool {
+		return statusList[i].OutboundTag < statusList[j].OutboundTag
+	})
+
+	// Re-calculate best index after sort is tricky, better to just highlight based on value or not rely on index.
+	// Actually, standard observatory sorts outbounds names first, then probes.
+	// Here we get result map, so order is random. We should sort first.
+
+	// Let's re-do properly: sort first, then find best.
+
+	// Sort
+	sort.Slice(statusList, func(i, j int) bool {
+		return statusList[i].OutboundTag < statusList[j].OutboundTag
+	})
+
+	// Find best again after sort
+	bestIdx = -1
+	minDelay = 99999999
+	for i, status := range statusList {
+		if status.Alive && status.Delay < minDelay {
+			minDelay = status.Delay
+			bestIdx = i
+		}
+	}
+
+	for i, status := range statusList {
+		icon := "  "
+		style := rowStyle
+		latency := fmt.Sprintf("%d ms", status.Delay)
+
+		if !status.Alive {
+			icon = "💀"
+			style = deadStyle
+			latency = "DEAD"
+		} else if i == bestIdx {
+			icon = "✅"
+			style = selectedStyle
+		}
+
+		row := fmt.Sprintf("%s %-20s | %s", icon, status.OutboundTag, latency)
+		rows = append(rows, style.Render(row))
+	}
+
+	if len(statusList) > 0 {
+		fmt.Println(boxStyle.Render(lipgloss.JoinVertical(lipgloss.Left, rows...)))
+	}
 }
 
 func (o *Observer) Close() error {
