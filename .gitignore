@@ -10,9 +10,7 @@ gen
 *.test
 *.out
 go.work
-main
-XrayR
-XrayR*
+
 access.log
 error.log
 .lego
