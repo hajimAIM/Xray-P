@@ -3,6 +3,7 @@ package panel
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"sync"
 
 	"dario.cat/mergo"
@@ -14,6 +15,7 @@ import (
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf"
+	"google.golang.org/protobuf/proto"
 
 	"Xray-P/api"
 	"Xray-P/api/sspanel"
@@ -88,19 +90,31 @@ func (p *Panel) loadCore(panelConfig *Config) *core.Instance {
 	}
 
 	// Observatory config
-	coreObservatoryConfig := &conf.ObservatoryConfig{}
+	var observatoryConfig proto.Message
 	if panelConfig.ObservatoryConfigPath != "" {
-		if data, err := os.ReadFile(panelConfig.ObservatoryConfigPath); err != nil {
+		data, err := os.ReadFile(panelConfig.ObservatoryConfigPath)
+		if err != nil {
 			log.Panicf("Failed to read Observatory config file at: %s", panelConfig.ObservatoryConfigPath)
+		}
+
+		// Auto-detect Burst config by checking for "pingConfig" field
+		if strings.Contains(string(data), "\"pingConfig\"") {
+			coreBurstObservatoryConfig := &conf.BurstObservatoryConfig{}
+			if err = json.Unmarshal(data, coreBurstObservatoryConfig); err != nil {
+				log.Panicf("Failed to unmarshal Burst Observatory config: %s", panelConfig.ObservatoryConfigPath)
+			}
+			observatoryConfig, err = coreBurstObservatoryConfig.Build()
 		} else {
+			coreObservatoryConfig := &conf.ObservatoryConfig{}
 			if err = json.Unmarshal(data, coreObservatoryConfig); err != nil {
 				log.Panicf("Failed to unmarshal Observatory config: %s", panelConfig.ObservatoryConfigPath)
 			}
+			observatoryConfig, err = coreObservatoryConfig.Build()
 		}
-	}
-	observatoryConfig, err := coreObservatoryConfig.Build()
-	if err != nil {
-		log.Panicf("Failed to understand Observatory config: %s", err)
+
+		if err != nil {
+			log.Panicf("Failed to understand Observatory config: %s", err)
+		}
 	}
 
 	// Custom Inbound config
