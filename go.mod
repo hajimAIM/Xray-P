@@ -12,7 +12,7 @@ require (
 	github.com/eko/gocache/store/redis/v4 v4.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-acme/lego/v4 v4.16.1
-	github.com/go-resty/resty/v2 v2.13.1
+	github.com/go-resty/resty/v2 v2.17.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/r3labs/diff/v2 v2.15.1
 	github.com/redis/go-redis/v9 v9.7.0 // indirect
@@ -26,10 +26,13 @@ require (
 	github.com/xtls/xray-core v1.251015.0
 	golang.org/x/crypto v0.43.0
 	golang.org/x/net v0.46.0
-	golang.org/x/time v0.7.0 // indirect
+	golang.org/x/time v0.12.0 // indirect
 )
 
-require github.com/charmbracelet/lipgloss v1.1.0
+require (
+	github.com/charmbracelet/lipgloss v1.1.0
+	google.golang.org/protobuf v1.36.10
+)
 
 require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
@@ -292,7 +295,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250804133106-a7a43d27e69b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250804133106-a7a43d27e69b // indirect
 	google.golang.org/grpc v1.76.0 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/ns1/ns1-go.v2 v2.9.0 // indirect
