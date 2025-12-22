@@ -16,8 +16,8 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/r3labs/diff/v2 v2.15.1
 	github.com/redis/go-redis/v9 v9.7.0 // indirect
-	github.com/sagernet/sing v0.5.1
-	github.com/sagernet/sing-shadowsocks v0.2.7
+	github.com/sagernet/sing v0.7.6
+	github.com/sagernet/sing-shadowsocks v0.2.9
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
@@ -29,7 +29,10 @@ require (
 	golang.org/x/time v0.7.0 // indirect
 )
 
-require github.com/charmbracelet/lipgloss v1.1.0
+require (
+	github.com/charmbracelet/lipgloss v1.1.0
+	google.golang.org/protobuf v1.36.10
+)
 
 require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
@@ -292,7 +295,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250804133106-a7a43d27e69b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250804133106-a7a43d27e69b // indirect
 	google.golang.org/grpc v1.76.0 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/ns1/ns1-go.v2 v2.9.0 // indirect
